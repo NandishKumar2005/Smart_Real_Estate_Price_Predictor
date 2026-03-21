@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5 mt-5">
+    <div class="row align-items-center mb-5 fade-in-up">
+        <div class="col-12">
+            <h2 class="display-6 fw-bold mb-3"><span class="text-gradient">Your Dashboard</span></h2>
+            <p class="text-muted">Welcome back, {{ user.username }}. Here is your prediction history.</p>
+        </div>
+    </div>
+
+    <div class="row fade-in-up delay-1">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                {% if history %}
+                <div class="table-responsive">
+                    <table class="table table-hover bg-transparent align-middle mb-0 dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Location</th>
+                                <th>Config</th>
+                                <th>Area (sq ft)</th>
+                                <th class="text-end">Predicted Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in history %}
+                            <tr>
+                                <td>{{ item.timestamp|date:"M d, Y" }}</td>
+                                <td>{{ item.location }}</td>
+                                <td>{{ item.bhk }} BHK</td>
+                                <td>{{ item.area }}</td>
+                                <td class="text-end fw-bold text-gradient">₹{{ item.predicted_price|floatformat:"0" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fa-solid fa-clock-rotate-left fa-3x text-muted mb-3"></i>
+                    <p class="text-muted mb-4">You haven't made any property price predictions yet.</p>
+                    <a href="{% url 'predict' %}" class="btn btn-primary rounded-pill px-4">Start Prediction</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

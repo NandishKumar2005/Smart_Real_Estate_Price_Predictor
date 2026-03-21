@@ -1,0 +1,226 @@
+:root {
+    --primary-color: #00f2fe;
+    --primary-dark: #4facfe;
+    --bg-color: #0f172a;
+    --text-color: #f8fafc;
+    --glass-bg: rgba(15, 23, 42, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --input-bg: rgba(255, 255, 255, 0.05);
+    --input-focus-bg: rgba(255, 255, 255, 0.1);
+    --muted-color: #cbd5e1;
+}
+
+[data-theme="light"] {
+    --primary-color: #00b4db;
+    --primary-dark: #0083b0;
+    --bg-color: #f8fafc;
+    --text-color: #0f172a;
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(0, 0, 0, 0.1);
+    --card-bg: rgba(255, 255, 255, 0.6);
+    --input-bg: rgba(255, 255, 255, 0.8);
+    --input-focus-bg: #fff;
+    --muted-color: #475569;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+main {
+    flex: 1;
+}
+
+/* Typography Details */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 800;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Glassmorphism Classes */
+.bg-glass {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--glass-border);
+    transition: background 0.3s, border-color 0.3s;
+}
+
+.glass-card {
+    background: var(--card-bg);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    color: var(--text-color);
+    transition: background 0.3s, border-color 0.3s, box-shadow 0.3s, color 0.3s;
+}
+
+/* Navbar Tweaks */
+.navbar {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.navbar-brand, .nav-link {
+    color: var(--text-color) !important;
+    transition: color 0.3s;
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    border: none;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
+    color: #fff !important;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+}
+
+.btn-outline-light {
+    border-color: var(--text-color);
+    color: var(--text-color);
+    background: transparent;
+    border-width: 2px;
+    font-weight: 600;
+    border-style: solid;
+    transition: background 0.3s, color 0.3s;
+}
+
+.btn-outline-light:hover {
+    background: var(--text-color);
+    color: var(--bg-color) !important;
+}
+
+/* Hero Section */
+.hero-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-top: 80px;
+}
+
+.hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at top right, rgba(79, 172, 254, 0.15), transparent 40%),
+                radial-gradient(circle at bottom left, rgba(0, 242, 254, 0.15), transparent 40%);
+    z-index: -1;
+}
+
+.hero-content h1 {
+    font-size: 4.5rem;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+}
+
+.hero-content p {
+    font-size: 1.2rem;
+    color: var(--muted-color);
+    margin-bottom: 2rem;
+    max-width: 600px;
+    transition: color 0.3s;
+}
+
+/* Animations */
+.fade-in-up {
+    animation: fadeInUp 0.8s ease forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.delay-1 { animation-delay: 0.2s; }
+.delay-2 { animation-delay: 0.4s; }
+.delay-3 { animation-delay: 0.6s; }
+
+/* Form Elements */
+.form-control, .form-select {
+    background-color: var(--input-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-color);
+    padding: 0.75rem 1rem;
+    transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s, color 0.3s;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--input-focus-bg);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(0, 242, 254, 0.25);
+    color: var(--text-color);
+}
+
+/* Fix dropdown options readability globally */
+.form-select option {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--muted-color);
+    margin-bottom: 0.5rem;
+    transition: color 0.3s;
+}
+
+/* Result Cards & Overrides */
+.price-display {
+    font-size: 3.5rem;
+    font-weight: 800;
+}
+
+.text-muted {
+    color: var(--muted-color) !important;
+}
+
+/* Footer visibility */
+footer p {
+    color: var(--muted-color) !important;
+    font-size: 0.95rem;
+}
+
+#themeToggle {
+    outline: none;
+}
+
+/* Table Overrides */
+.table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--text-color);
+    --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
+    border-color: var(--glass-border);
+}
+
+[data-theme="light"] .table {
+    --bs-table-hover-bg: rgba(0, 0, 0, 0.05);
+}

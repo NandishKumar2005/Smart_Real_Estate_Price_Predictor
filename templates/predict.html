@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5 mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5 fade-in-up">
+                <h2 class="display-5 fw-bold"><span class="text-gradient">Property Valuation</span></h2>
+                <p class="text-muted">Enter the details of the property to get an AI-estimated price.</p>
+            </div>
+            
+            <div class="glass-card p-4 p-md-5 fade-in-up delay-1">
+                <form id="predictionForm" method="POST" action="{% url 'predict' %}">
+                    {% csrf_token %}
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label for="location" class="form-label">Location</label>
+                            <select class="form-select" id="location" name="location" required>
+                                <option value="" selected disabled>Select an area</option>
+                                {% for loc in locations %}
+                                    <option value="{{ loc }}">{{ loc }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="area" class="form-label">Super Built-up Area (sq ft)</label>
+                            <input type="number" class="form-control" id="area" name="area" placeholder="e.g., 1200" required min="100">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="bhk" class="form-label">BHK Config</label>
+                            <select class="form-select" id="bhk" name="bhk" required>
+                                <option value="1">1 BHK</option>
+                                <option value="2" selected>2 BHK</option>
+                                <option value="3">3 BHK</option>
+                                <option value="4">4+ BHK</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="bathrooms" class="form-label">Bathrooms</label>
+                            <select class="form-select" id="bathrooms" name="bathrooms" required>
+                                <option value="1">1</option>
+                                <option value="2" selected>2</option>
+                                <option value="3">3</option>
+                                <option value="4">4+</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="age" class="form-label">Property Age (Years)</label>
+                            <input type="number" class="form-control" id="age" name="age" placeholder="0 for new properties" required min="0" value="0">
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-5">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 w-100 w-md-auto" id="predictBtn">
+                            <i class="fa-solid fa-wand-magic-sparkles me-2"></i> Get Valuation
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const btn = document.getElementById('predictBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
+    btn.disabled = true;
+    
+    // Create payload
+    const formData = new FormData(this);
+    const data = {
+        location: formData.get('location'),
+        area: parseFloat(formData.get('area')),
+        bhk: parseInt(formData.get('bhk')),
+        bathrooms: parseInt(formData.get('bathrooms')),
+        age: parseInt(formData.get('age'))
+    };
+    
+    try {
+        const response = await fetch('/api/predict-price', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            // Save parameters in session storage to display on result page
+            sessionStorage.setItem('predictionResult', JSON.stringify({
+                input: data,
+                price: result.predicted_price
+            }));
+            
+            // Save AI Investment Advisor variables
+            sessionStorage.setItem('adviFuturePrice', result.future_price_5y);
+            sessionStorage.setItem('adviROI', result.roi_percent);
+            sessionStorage.setItem('adviScore', result.investment_score);
+            sessionStorage.setItem('adviRec', result.recommendation);
+            
+            // Redirect to result page
+            window.location.href = "{% url 'result' %}";
+        } else {
+            alert('Error: ' + JSON.stringify(result));
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred during prediction.');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+});
+</script>
+{% endblock %}
