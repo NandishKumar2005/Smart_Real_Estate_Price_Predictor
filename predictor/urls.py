@@ -14,4 +14,6 @@ urlpatterns = [
     
     path('api/predict-price', views.PredictPriceAPIView.as_view(), name='api-predict-price'),
     path('api/price-heatmap', views.PriceHeatmapAPIView.as_view(), name='api-price-heatmap'),
+    path('api/debug-env', views.DebugEnvAPIView.as_view(), name='api-debug-env'),
 ]
+

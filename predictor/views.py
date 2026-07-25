@@ -178,3 +178,15 @@ class LogoutView(View):
     def get(self, request):
         logout(request)
         return redirect('home')
+
+class DebugEnvAPIView(APIView):
+    def get(self, request):
+        import os
+        keys = list(os.environ.keys())
+        keys_summary = {key: "Set" if os.environ.get(key) else "Empty" for key in keys}
+        return Response({
+            "keys": keys_summary, 
+            "has_database_url": "DATABASE_URL" in os.environ,
+            "has_postgres_url": "POSTGRES_URL" in os.environ
+        })
+
