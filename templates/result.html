@@ -151,15 +151,24 @@
         const map = L.map('map').setView([20.5937, 78.9629], 5); // Default to center of India
         
         function getMapTileUrl() {
-            return 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+            const theme = localStorage.getItem('theme') || 'dark';
+            return theme === 'light'
+                ? 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png'
+                : 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png';
         }
         
         let tileLayer = L.tileLayer(getMapTileUrl(), {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            maxZoom: 19
+            attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            maxZoom: 20
         }).addTo(map);
 
-        window.addEventListener('themeChanged', () => {});
+        window.addEventListener('themeChanged', () => {
+            map.removeLayer(tileLayer);
+            tileLayer = L.tileLayer(getMapTileUrl(), {
+                attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 20
+            }).addTo(map);
+        });
 
         // Fetch coordinates dynamically
         fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(data.input.location + ', India')}`)

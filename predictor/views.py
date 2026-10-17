@@ -34,7 +34,11 @@ GOOGLE_SCOPE = "openid email profile"
 
 
 def _google_redirect_uri(request):
-    """Build the absolute callback URL."""
+    """Always use the production domain for OAuth callback to avoid Vercel preview URL mismatches."""
+    production_domain = os.environ.get('PRODUCTION_DOMAIN', '')
+    if production_domain:
+        return f"https://{production_domain}/auth/google/callback/"
+    # Fallback for local dev
     return request.build_absolute_uri(reverse('google-oauth-callback'))
 
 
