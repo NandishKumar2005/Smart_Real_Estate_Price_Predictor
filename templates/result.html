@@ -151,22 +151,37 @@
         const map = L.map('map').setView([20.5937, 78.9629], 5); // Default to center of India
         
         function getMapTileUrl() {
+            const MAPTILER_KEY = '{{ maptiler_key }}';
             const theme = localStorage.getItem('theme') || 'dark';
-            return theme === 'light'
-                ? 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png'
-                : 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png';
+            const style = theme === 'light' ? 'streets-v2' : 'streets-v2-dark';
+            if (MAPTILER_KEY && MAPTILER_KEY !== 'None' && MAPTILER_KEY !== '') {
+                return `https://api.maptiler.com/maps/${style}/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`;
+            }
+            return 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        }
+
+        function getMapAttribution() {
+            const MAPTILER_KEY = '{{ maptiler_key }}';
+            if (MAPTILER_KEY && MAPTILER_KEY !== 'None' && MAPTILER_KEY !== '') {
+                return '&copy; <a href="https://www.maptiler.com/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+            }
+            return '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
         }
         
         let tileLayer = L.tileLayer(getMapTileUrl(), {
-            attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            maxZoom: 20
+            attribution: getMapAttribution(),
+            maxZoom: 20,
+            tileSize: 512,
+            zoomOffset: -1
         }).addTo(map);
 
         window.addEventListener('themeChanged', () => {
             map.removeLayer(tileLayer);
             tileLayer = L.tileLayer(getMapTileUrl(), {
-                attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-                maxZoom: 20
+                attribution: getMapAttribution(),
+                maxZoom: 20,
+                tileSize: 512,
+                zoomOffset: -1
             }).addTo(map);
         });
 

@@ -235,9 +235,19 @@ class PredictView(LoginRequiredMixin, TemplateView):
 class ResultView(LoginRequiredMixin, TemplateView):
     template_name = 'result.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['maptiler_key'] = os.environ.get('MAPTILER_API_KEY', '')
+        return context
+
 
 class HeatmapView(LoginRequiredMixin, TemplateView):
     template_name = 'heatmap.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['maptiler_key'] = os.environ.get('MAPTILER_API_KEY', '')
+        return context
 
 
 class HistoryView(LoginRequiredMixin, TemplateView):

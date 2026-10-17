@@ -59,24 +59,41 @@
         // Initialize Map centered on Bangalore
         const map = L.map('heatmap-container').setView([12.9716, 77.5946], 11);
         
-        // Stadia Maps tiles — free, no API key required, works from any host
+        // MapTiler tiles — set MAPTILER_API_KEY in Vercel env vars
+        // Get a free key at https://maptiler.com (75k tiles/month free)
+        const MAPTILER_KEY = '{{ maptiler_key }}';
         function getTileLayerUrl() {
             const theme = localStorage.getItem('theme') || 'dark';
-            return theme === 'light'
-                ? 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png'
-                : 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png';
+            const style = theme === 'light' ? 'streets-v2' : 'streets-v2-dark';
+            if (MAPTILER_KEY && MAPTILER_KEY !== 'None' && MAPTILER_KEY !== '') {
+                return `https://api.maptiler.com/maps/${style}/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`;
+            }
+            // Fallback: OpenStreetMap (works locally, may be rate-limited on hosted)
+            return 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        }
+
+        function getTileAttribution() {
+            const MAPTILER_KEY = '{{ maptiler_key }}';
+            if (MAPTILER_KEY && MAPTILER_KEY !== 'None' && MAPTILER_KEY !== '') {
+                return '&copy; <a href="https://www.maptiler.com/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+            }
+            return '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
         }
 
         let tileLayer = L.tileLayer(getTileLayerUrl(), {
-            attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            maxZoom: 20
+            attribution: getTileAttribution(),
+            maxZoom: 20,
+            tileSize: 512,
+            zoomOffset: -1
         }).addTo(map);
 
         window.addEventListener('themeChanged', () => {
             map.removeLayer(tileLayer);
             tileLayer = L.tileLayer(getTileLayerUrl(), {
-                attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-                maxZoom: 20
+                attribution: getTileAttribution(),
+                maxZoom: 20,
+                tileSize: 512,
+                zoomOffset: -1
             }).addTo(map);
         });
 
