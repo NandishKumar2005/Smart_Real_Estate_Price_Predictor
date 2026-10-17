@@ -4,8 +4,6 @@
 {% block extra_head %}
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
     #map { height: 300px; border-radius: 12px; }
 </style>
@@ -98,121 +96,88 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
+    // Map init called by Google Maps callback
+    let resultMap, resultMarker;
+
+    window.initResultMap = function() {};  // placeholder, real init happens after data load
+
     document.addEventListener('DOMContentLoaded', function() {
-        // Retrieve data from session storage
         const storedData = sessionStorage.getItem('predictionResult');
         if (!storedData) {
             window.location.href = "{% url 'predict' %}";
             return;
         }
-        
+
         const data = JSON.parse(storedData);
         const formatCurrency = new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            maximumFractionDigits: 0
+            style: 'currency', currency: 'INR', maximumFractionDigits: 0
         }).format(data.price);
-        
+
         document.getElementById('priceDisplay').textContent = formatCurrency;
         document.getElementById('resLocation').textContent = data.input.location;
         document.getElementById('resArea').textContent = data.input.area;
         document.getElementById('resBhk').textContent = data.input.bhk;
-        
-        // --- Added for AI Investment Advisor ---
-        const adviFuturePrice = sessionStorage.getItem('adviFuturePrice') || data.price * 1.469; // fallback if missing
-        const adviROI = sessionStorage.getItem('adviROI') || 46.9; // fallback
-        const adviScore = sessionStorage.getItem('adviScore') || 9; // fallback
-        const adviRec = sessionStorage.getItem('adviRec') || 'Good Investment'; // fallback
-        
+
+        const adviFuturePrice = sessionStorage.getItem('adviFuturePrice') || data.price * 1.469;
+        const adviROI = sessionStorage.getItem('adviROI') || 46.9;
+        const adviScore = sessionStorage.getItem('adviScore') || 9;
+        const adviRec = sessionStorage.getItem('adviRec') || 'Good Investment';
+
         document.getElementById('resFuturePrice').textContent = new Intl.NumberFormat('en-IN', {
             style: 'currency', currency: 'INR', maximumFractionDigits: 0
         }).format(adviFuturePrice);
-        
         document.getElementById('resROI').textContent = adviROI + "%";
-        
+
         const scoreEl = document.getElementById('resScore');
         scoreEl.textContent = adviScore;
-        // Conditional coloring for Score
-        if (adviScore >= 8) scoreEl.className = "fs-4 text-success";
-        else if (adviScore >= 5) scoreEl.className = "fs-4 text-warning";
-        else scoreEl.className = "fs-4 text-danger";
-        
+        scoreEl.className = adviScore >= 8 ? "fs-4 text-success" : adviScore >= 5 ? "fs-4 text-warning" : "fs-4 text-danger";
+
         const recEl = document.getElementById('resRecommendation');
         recEl.textContent = adviRec;
-        if (adviScore >= 8) recEl.className = "fs-5 mt-1 d-block text-success";
-        else if (adviScore >= 5) recEl.className = "fs-5 mt-1 d-block text-warning";
-        else recEl.className = "fs-5 mt-1 d-block text-danger";
-        // ----------------------------------------
-        
-        // Determine map center dynamically using Nominatim (OpenStreetMap Geocoding API)
-        const map = L.map('map').setView([20.5937, 78.9629], 5); // Default to center of India
-        
-        function getMapTileUrl() {
-            const MAPTILER_KEY = '{{ maptiler_key }}';
-            const theme = localStorage.getItem('theme') || 'dark';
-            const style = theme === 'light' ? 'streets-v2' : 'streets-v2-dark';
-            if (MAPTILER_KEY && MAPTILER_KEY !== 'None' && MAPTILER_KEY !== '') {
-                return `https://api.maptiler.com/maps/${style}/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`;
-            }
-            return 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-        }
+        recEl.className = adviScore >= 8 ? "fs-5 mt-1 d-block text-success" : adviScore >= 5 ? "fs-5 mt-1 d-block text-warning" : "fs-5 mt-1 d-block text-danger";
 
-        function getMapAttribution() {
-            const MAPTILER_KEY = '{{ maptiler_key }}';
-            if (MAPTILER_KEY && MAPTILER_KEY !== 'None' && MAPTILER_KEY !== '') {
-                return '&copy; <a href="https://www.maptiler.com/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
-            }
-            return '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-        }
-        
-        let tileLayer = L.tileLayer(getMapTileUrl(), {
-            attribution: getMapAttribution(),
-            maxZoom: 20,
-            tileSize: 512,
-            zoomOffset: -1
-        }).addTo(map);
+        // --- Google Maps ---
+        async function initMap() {
+            const { Map } = await google.maps.importLibrary("maps");
+            const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+            const { Geocoder } = await google.maps.importLibrary("geocoding");
 
-        window.addEventListener('themeChanged', () => {
-            map.removeLayer(tileLayer);
-            tileLayer = L.tileLayer(getMapTileUrl(), {
-                attribution: getMapAttribution(),
-                maxZoom: 20,
-                tileSize: 512,
-                zoomOffset: -1
-            }).addTo(map);
-        });
+            resultMap = new Map(document.getElementById('map'), {
+                center: { lat: 20.5937, lng: 78.9629 },
+                zoom: 5,
+                mapId: 'DEMO_MAP_ID',
+                mapTypeControl: false,
+                streetViewControl: false,
+            });
 
-        // Fetch coordinates dynamically
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(data.input.location + ', India')}`)
-            .then(response => response.json())
-            .then(geocodeData => {
-                if (geocodeData && geocodeData.length > 0) {
-                    const lat = parseFloat(geocodeData[0].lat);
-                    const lon = parseFloat(geocodeData[0].lon);
-                    
-                    // Update Map View
-                    map.setView([lat, lon], 13);
-                    
-                    L.marker([lat, lon]).addTo(map)
-                        .bindPopup(`<b>${data.input.location}</b><br>Predicted: ${formatCurrency}`)
-                        .openPopup();
-                } else {
-                    // Fallback to center of map if geocoding fails
-                    console.log("Geocoding failed for: ", data.input.location);
+            const geocoder = new Geocoder();
+            geocoder.geocode({ address: data.input.location + ', India' }, (results, geoStatus) => {
+                if (geoStatus === 'OK' && results[0]) {
+                    const loc = results[0].geometry.location;
+                    resultMap.setCenter(loc);
+                    resultMap.setZoom(13);
+                    new AdvancedMarkerElement({
+                        map: resultMap,
+                        position: loc,
+                        title: data.input.location
+                    });
                 }
-            })
-            .catch(err => console.error("Geocoding API Error:", err));
-            
-        // Init Chart.js
+            });
+        }
+
+        // Wait for Google Maps to be ready
+        if (typeof google !== 'undefined' && google.maps) {
+            initMap();
+        } else {
+            window.initResultMap = initMap;
+        }
+
+        // --- Charts ---
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.font.family = "'Outfit', sans-serif";
-        
-        // Area Chart
-        const ctxArea = document.getElementById('areaChart').getContext('2d');
-        new Chart(ctxArea, {
+
+        new Chart(document.getElementById('areaChart').getContext('2d'), {
             type: 'scatter',
             data: {
                 datasets: [{
@@ -223,28 +188,23 @@
                         {x: data.input.area * 1.1, y: data.price * 1.15},
                         {x: data.input.area * 1.2, y: data.price * 1.3},
                     ],
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                    pointRadius: 6
+                    backgroundColor: 'rgba(255,255,255,0.2)', pointRadius: 6
                 }, {
                     label: 'Your Property',
                     data: [{x: data.input.area, y: data.price}],
-                    backgroundColor: '#00f2fe',
-                    pointRadius: 8,
-                    pointHoverRadius: 10
+                    backgroundColor: '#00f2fe', pointRadius: 8, pointHoverRadius: 10
                 }]
             },
             options: {
                 responsive: true,
                 scales: {
-                    x: { title: { display: true, text: 'Area (sq ft)' }, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
-                    y: { title: { display: true, text: 'Price (INR)' }, grid: { color: 'rgba(255, 255, 255, 0.05)' } }
+                    x: { title: { display: true, text: 'Area (sq ft)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    y: { title: { display: true, text: 'Price (INR)' }, grid: { color: 'rgba(255,255,255,0.05)' } }
                 }
             }
         });
-        
-        // Dist Chart (Bar)
-        const ctxDist = document.getElementById('distChart').getContext('2d');
-        new Chart(ctxDist, {
+
+        new Chart(document.getElementById('distChart').getContext('2d'), {
             type: 'bar',
             data: {
                 labels: ['1 BHK', '2 BHK', '3 BHK', '4+ BHK'],
@@ -252,45 +212,34 @@
                     label: 'Avg Price',
                     data: [data.price * 0.6, data.price, data.price * 1.5, data.price * 2.2],
                     backgroundColor: [
-                        'rgba(255,255,255,0.1)',
+                        data.input.bhk == 1 ? '#4facfe' : 'rgba(255,255,255,0.1)',
                         data.input.bhk == 2 ? '#4facfe' : 'rgba(255,255,255,0.1)',
                         data.input.bhk == 3 ? '#4facfe' : 'rgba(255,255,255,0.1)',
-                        data.input.bhk >= 4 ? '#4facfe' : 'rgba(255,255,255,0.1)'
+                        data.input.bhk >= 4 ? '#4facfe' : 'rgba(255,255,255,0.1)',
                     ],
-                    borderWidth: 0,
-                    borderRadius: 4
+                    borderWidth: 0, borderRadius: 4
                 }]
             },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { display: false }
-                }
-            }
+            options: { responsive: true, scales: { y: { display: false } } }
         });
-        
-        // Investment Chart (Line/Bar)
-        const ctxInv = document.getElementById('investmentChart').getContext('2d');
-        new Chart(ctxInv, {
+
+        new Chart(document.getElementById('investmentChart').getContext('2d'), {
             type: 'bar',
             data: {
                 labels: ['Current', 'In 5 Years'],
                 datasets: [{
                     label: 'Property Value',
                     data: [data.price, adviFuturePrice],
-                    backgroundColor: ['rgba(0, 242, 254, 0.4)', 'rgba(0, 242, 254, 0.8)'],
+                    backgroundColor: ['rgba(0,242,254,0.4)', 'rgba(0,242,254,0.8)'],
                     borderColor: ['#00f2fe', '#00f2fe'],
-                    borderWidth: 2,
-                    borderRadius: 8
+                    borderWidth: 2, borderRadius: 8
                 }]
             },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { display: false }
-                }
-            }
+            options: { responsive: true, scales: { y: { display: false } } }
         });
     });
+</script>
+<script async
+    src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&libraries=maps,marker,geocoding&loading=async&callback=initResultMap">
 </script>
 {% endblock %}

@@ -237,7 +237,7 @@ class ResultView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['maptiler_key'] = os.environ.get('MAPTILER_API_KEY', '')
+        context['google_maps_key'] = os.environ.get('GOOGLE_MAPS_API_KEY', '')
         return context
 
 
@@ -246,7 +246,7 @@ class HeatmapView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['maptiler_key'] = os.environ.get('MAPTILER_API_KEY', '')
+        context['google_maps_key'] = os.environ.get('GOOGLE_MAPS_API_KEY', '')
         return context
 
 

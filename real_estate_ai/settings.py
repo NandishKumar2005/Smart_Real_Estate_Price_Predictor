@@ -37,6 +37,9 @@ ALLOWED_HOSTS = ['.vercel.app', '127.0.0.1', 'localhost']
 GOOGLE_OAUTH_CLIENT_ID = os.environ.get('GOOGLE_OAUTH_CLIENT_ID', '')
 GOOGLE_OAUTH_CLIENT_SECRET = os.environ.get('GOOGLE_OAUTH_CLIENT_SECRET', '')
 
+# Google Maps JavaScript API key (set in Vercel environment variables)
+GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY', '')
+
 # Application definition
 
 INSTALLED_APPS = [
