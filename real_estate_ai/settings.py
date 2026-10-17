@@ -11,8 +11,12 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
-import dj_database_url
 from pathlib import Path
+
+try:
+    import dj_database_url
+except ModuleNotFoundError:
+    dj_database_url = None
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,6 +33,9 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['.vercel.app', '127.0.0.1', 'localhost']
 
+# Google OAuth2 credentials (set these in Vercel environment variables)
+GOOGLE_OAUTH_CLIENT_ID = os.environ.get('GOOGLE_OAUTH_CLIENT_ID', '')
+GOOGLE_OAUTH_CLIENT_SECRET = os.environ.get('GOOGLE_OAUTH_CLIENT_SECRET', '')
 
 # Application definition
 
@@ -77,6 +84,11 @@ WSGI_APPLICATION = 'real_estate_ai.wsgi.application'
 
 db_url = os.environ.get('DATABASE_URL') or os.environ.get('POSTGRES_URL')
 if db_url:
+    if dj_database_url is None:
+        raise RuntimeError(
+            "DATABASE_URL is set, but 'dj_database_url' is not installed. "
+            "Install it with: pip install dj-database-url"
+        )
     DATABASES = {
         'default': dj_database_url.parse(db_url, conn_max_age=600)
     }
@@ -131,3 +143,7 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
