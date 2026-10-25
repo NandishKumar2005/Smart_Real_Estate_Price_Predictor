@@ -3,6 +3,15 @@ class InvestmentAdvisor:
         self.years = years
 
     def analyze_investment(self, current_price, property_age=0, location=""):
+        # Guard against zero / negative price to prevent ZeroDivisionError (Bug fix – found by WB06)
+        if current_price <= 0:
+            return {
+                "future_price_5y": 0,
+                "roi_percent": 0.0,
+                "investment_score": 4,
+                "recommendation": "Risky Investment",
+                "assumed_growth_rate": 0.0
+            }
         """
         Calculates ROI based on property age and specific city growth rates.
         """

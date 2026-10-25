@@ -87,9 +87,295 @@
     </main>
 
     <!-- Footer -->
-    <footer class="text-center mt-5 py-4">
-        <p class="mb-0 text-muted">&copy; 2026 WorthIT Real Estate. All rights reserved.</p>
+    <footer class="site-footer mt-5">
+        <div class="footer-main py-5">
+            <div class="container">
+                <div class="row g-4">
+
+                    <!-- Brand Column -->
+                    <div class="col-lg-4 col-md-6">
+                        <div class="footer-brand mb-3">
+                            <i class="fa-solid fa-house-chimney-window text-primary me-2 fs-4"></i>
+                            <span class="fw-bold fs-4">WorthIT</span>
+                        </div>
+                        <p class="footer-tagline text-muted small">
+                            India's AI-powered real estate intelligence platform. Make smarter property decisions
+                            backed by data, machine learning, and real market insights.
+                        </p>
+                        <div class="footer-social mt-3 d-flex gap-3">
+                            <a href="https://github.com/NandishKumar2005/Smart_Real_Estate_Price_Predictor"
+                               target="_blank" rel="noopener" class="footer-social-icon" title="GitHub Repository">
+                                <i class="fa-brands fa-github"></i>
+                            </a>
+                            <a href="mailto:nandishkumar01122005@gmail.com"
+                               class="footer-social-icon" title="Send us an email">
+                                <i class="fa-solid fa-envelope"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div class="col-lg-2 col-md-6 col-6">
+                        <h6 class="footer-heading mb-3">Quick Links</h6>
+                        <ul class="footer-links list-unstyled">
+                            <li><a href="{% url 'home' %}"><i class="fa-solid fa-chevron-right me-1"></i>Home</a></li>
+                            <li><a href="{% url 'predict' %}"><i class="fa-solid fa-chevron-right me-1"></i>Predict Price</a></li>
+                            <li><a href="{% url 'heatmap' %}"><i class="fa-solid fa-chevron-right me-1"></i>Price Heatmap</a></li>
+                            {% if user.is_authenticated %}
+                            <li><a href="{% url 'history' %}"><i class="fa-solid fa-chevron-right me-1"></i>My Dashboard</a></li>
+                            <li><a href="{% url 'logout' %}"><i class="fa-solid fa-chevron-right me-1"></i>Logout</a></li>
+                            {% else %}
+                            <li><a href="{% url 'login' %}"><i class="fa-solid fa-chevron-right me-1"></i>Login</a></li>
+                            <li><a href="{% url 'register' %}"><i class="fa-solid fa-chevron-right me-1"></i>Register</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+
+                    <!-- Legal -->
+                    <div class="col-lg-3 col-md-6 col-6">
+                        <h6 class="footer-heading mb-3">Legal</h6>
+                        <ul class="footer-links list-unstyled">
+                            <li>
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">
+                                    <i class="fa-solid fa-shield-halved me-1"></i>Privacy Policy
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">
+                                    <i class="fa-solid fa-file-contract me-1"></i>Terms of Service
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#cookieModal">
+                                    <i class="fa-solid fa-cookie-bite me-1"></i>Cookie Policy
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#disclaimerModal">
+                                    <i class="fa-solid fa-circle-info me-1"></i>Disclaimer
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Support / Contact -->
+                    <div class="col-lg-3 col-md-6">
+                        <h6 class="footer-heading mb-3">Support & Contact</h6>
+                        <ul class="footer-links list-unstyled footer-contact">
+                            <li>
+                                <i class="fa-solid fa-envelope text-primary me-2"></i>
+                                <a href="mailto:nandishkumar01122005@gmail.com">nandishkumar01122005@gmail.com</a>
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-circle-question text-primary me-2"></i>
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#supportModal">Help & FAQ</a>
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-bug text-primary me-2"></i>
+                                <a href="https://github.com/NandishKumar2005/Smart_Real_Estate_Price_Predictor/issues"
+                                   target="_blank" rel="noopener">Report a Bug</a>
+                            </li>
+                            <li class="mt-3">
+                                <span class="badge-api-powered">
+                                    <i class="fa-brands fa-google me-1"></i>Powered by Google Maps API
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Bottom Bar -->
+        <div class="footer-bottom py-3">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-center text-md-start">
+                        <p class="mb-0 small text-muted">
+                            &copy; 2026 <strong>WorthIT Real Estate</strong>. All rights reserved.
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end mt-2 mt-md-0">
+                        <p class="mb-0 small text-muted">
+                            Built with <i class="fa-solid fa-heart text-danger mx-1"></i> using
+                            <strong>Django</strong> · <strong>Random Forest ML</strong> · <strong>Google Maps</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </footer>
+
+    <!-- ===================== MODALS ===================== -->
+
+    <!-- Privacy Policy Modal -->
+    <div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content bg-dark text-light border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="privacyModalLabel"><i class="fa-solid fa-shield-halved text-primary me-2"></i>Privacy Policy</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">Last updated: October 2026</p>
+                    <h6>1. Information We Collect</h6>
+                    <p>We collect information you provide directly to us, such as when you create an account (username) or submit a property prediction request (location, area, BHK, bathrooms, property age).</p>
+                    <h6>2. How We Use Your Information</h6>
+                    <p>Your prediction data is stored solely to power your personal dashboard and prediction history. We do not sell or share your data with third parties.</p>
+                    <h6>3. Google Maps API</h6>
+                    <p>Our heatmap visualization is powered by the Google Maps JavaScript API. Usage is subject to <a href="https://policies.google.com/privacy" target="_blank" class="text-primary">Google's Privacy Policy</a>.</p>
+                    <h6>4. Cookies</h6>
+                    <p>We use cookies only for session management and theme preference storage (localStorage). No tracking or advertising cookies are used.</p>
+                    <h6>5. Contact</h6>
+                    <p>For any privacy-related queries, contact us at <a href="mailto:nandishkumar01122005@gmail.com" class="text-primary">nandishkumar01122005@gmail.com</a>.</p>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-light btn-sm" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms of Service Modal -->
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content bg-dark text-light border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="termsModalLabel"><i class="fa-solid fa-file-contract text-primary me-2"></i>Terms of Service</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">Last updated: October 2026</p>
+                    <h6>1. Acceptance of Terms</h6>
+                    <p>By using WorthIT Real Estate, you agree to these Terms of Service. If you do not agree, please discontinue use of the platform.</p>
+                    <h6>2. Use of the Platform</h6>
+                    <p>WorthIT is provided for informational and educational purposes only. Predictions generated by our ML model are estimates and should not be treated as professional real estate valuations or financial advice.</p>
+                    <h6>3. Account Responsibility</h6>
+                    <p>You are responsible for maintaining the confidentiality of your account credentials. Any activity under your account is your responsibility.</p>
+                    <h6>4. Intellectual Property</h6>
+                    <p>All source code, trained models, and UI designs are the intellectual property of the WorthIT development team. Unauthorized commercial use is prohibited.</p>
+                    <h6>5. Limitation of Liability</h6>
+                    <p>WorthIT and its developers are not liable for any financial decisions made based on the predictions provided by this platform.</p>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-light btn-sm" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cookie Policy Modal -->
+    <div class="modal fade" id="cookieModal" tabindex="-1" aria-labelledby="cookieModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content bg-dark text-light border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="cookieModalLabel"><i class="fa-solid fa-cookie-bite text-primary me-2"></i>Cookie Policy</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">Last updated: October 2026</p>
+                    <h6>What Cookies We Use</h6>
+                    <p>WorthIT uses only essential, functional cookies:</p>
+                    <ul>
+                        <li><strong>Session cookie:</strong> Keeps you logged in during your visit.</li>
+                        <li><strong>Theme preference:</strong> Stored in <code>localStorage</code> to remember your dark/light mode choice.</li>
+                    </ul>
+                    <p>We do <strong>not</strong> use advertising, analytics, or third-party tracking cookies.</p>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-light btn-sm" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disclaimer Modal -->
+    <div class="modal fade" id="disclaimerModal" tabindex="-1" aria-labelledby="disclaimerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content bg-dark text-light border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="disclaimerModalLabel"><i class="fa-solid fa-circle-info text-primary me-2"></i>Disclaimer</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>All price predictions on WorthIT are generated by a <strong>Random Forest machine learning model</strong> trained on historical real estate datasets for Bangalore, Mumbai, Chennai, and Kolkata.</p>
+                    <p>These predictions are <strong>estimates only</strong> and may not reflect current market conditions. Always consult a certified real estate agent or valuator before making any investment decisions.</p>
+                    <p>Map visualizations are powered by <strong>Google Maps JavaScript API</strong> and are subject to Google's terms of service.</p>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-light btn-sm" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support / FAQ Modal -->
+    <div class="modal fade" id="supportModal" tabindex="-1" aria-labelledby="supportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content bg-dark text-light border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="supportModalLabel"><i class="fa-solid fa-circle-question text-primary me-2"></i>Help & FAQ</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="accordion accordion-flush" id="faqAccordion">
+                        <div class="accordion-item bg-transparent border-secondary">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed bg-transparent text-light" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                    How accurate are the price predictions?
+                                </button>
+                            </h2>
+                            <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted small">
+                                    Our Random Forest model is trained on thousands of real estate listings. Predictions are directionally accurate but should be treated as estimates — actual prices vary based on current market conditions and negotiations.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item bg-transparent border-secondary">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed bg-transparent text-light" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                    Which cities are supported?
+                                </button>
+                            </h2>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted small">
+                                    Currently WorthIT supports <strong>Bangalore, Mumbai, Chennai, and Kolkata</strong> with 1,400+ location data points across these cities.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item bg-transparent border-secondary">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed bg-transparent text-light" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                    What does the Investment Score mean?
+                                </button>
+                            </h2>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted small">
+                                    The Investment Score (4 / 6 / 9) is calculated from the projected 5-year ROI, city-specific growth rate, and property age. A score of 9 = Good Investment, 6 = Moderate, 4 = Risky.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item bg-transparent border-secondary">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed bg-transparent text-light" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                    How do I contact support?
+                                </button>
+                            </h2>
+                            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted small">
+                                    Email us at <a href="mailto:nandishkumar01122005@gmail.com" class="text-primary">nandishkumar01122005@gmail.com</a> or open an issue on our <a href="https://github.com/NandishKumar2005/Smart_Real_Estate_Price_Predictor/issues" target="_blank" class="text-primary">GitHub repository</a>.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-light btn-sm" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
