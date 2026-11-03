@@ -148,27 +148,24 @@ class PriceHeatmapAPIView(APIView):
 
             grouped = df.groupby(['City', 'Location'])['Price'].mean().reset_index()
 
-            # Sample up to 60 locations per city so all 6 cities are represented
-            sampled = (
-                grouped.groupby('City', group_keys=False)
-                .apply(lambda g: g.sample(n=min(len(g), 60), random_state=42))
-                .reset_index(drop=True)
-            )
-
+            # Sample up to 60 per city explicitly to avoid pandas version issues
             data = []
-            for _, row in sampled.iterrows():
-                city = row['City'].strip()
-                if city in city_coords:
+            for city, coords in city_coords.items():
+                city_rows = grouped[grouped['City'].str.strip() == city]
+                sample_size = min(len(city_rows), 60)
+                if sample_size == 0:
+                    continue
+                city_sample = city_rows.sample(n=sample_size, random_state=42)
+                for _, row in city_sample.iterrows():
                     loc_hash = hash(row['Location'])
-                    # Use different hash seeds for lat/lon so bubbles spread out
                     jitter_lat = (loc_hash % 1000) / 10000.0 - 0.05
                     jitter_lon = ((loc_hash // 1000) % 1000) / 10000.0 - 0.05
                     data.append({
-                        "location": f"{row['Location']}, {city}",
+                        "location": row['Location'] + ", " + city,
                         "city": city,
-                        "lat": city_coords[city]['lat'] + jitter_lat,
-                        "lng": city_coords[city]['lon'] + jitter_lon,
-                        "price": row['Price']
+                        "lat": coords['lat'] + jitter_lat,
+                        "lng": coords['lon'] + jitter_lon,
+                        "price": float(row['Price'])
                     })
 
             return Response(data, status=status.HTTP_200_OK)
