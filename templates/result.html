@@ -138,31 +138,23 @@
         recEl.className = adviScore >= 8 ? "fs-5 mt-1 d-block text-success" : adviScore >= 5 ? "fs-5 mt-1 d-block text-warning" : "fs-5 mt-1 d-block text-danger";
 
         // --- Google Maps ---
-        // Store location globally so initResultMap callback can access it
         window._resultLocation = data.input.location;
 
-        async function loadResultMap() {
-            const { Map } = await google.maps.importLibrary("maps");
-            const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
-            const { Geocoder } = await google.maps.importLibrary("geocoding");
-
-            resultMap = new Map(document.getElementById('map'), {
+        function loadResultMap() {
+            resultMap = new google.maps.Map(document.getElementById('map'), {
                 center: { lat: 20.5937, lng: 78.9629 },
                 zoom: 5,
-                mapId: 'DEMO_MAP_ID',
                 mapTypeControl: false,
                 streetViewControl: false,
             });
 
-            const geocoder = new Geocoder();
-            // location already contains city e.g. "Whitefield, Bangalore"
-            const searchAddress = window._resultLocation + ', India';
-            geocoder.geocode({ address: searchAddress }, (results, geoStatus) => {
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: window._resultLocation + ', India' }, function(results, geoStatus) {
                 if (geoStatus === 'OK' && results[0]) {
                     const loc = results[0].geometry.location;
                     resultMap.setCenter(loc);
                     resultMap.setZoom(14);
-                    new AdvancedMarkerElement({
+                    new google.maps.Marker({
                         map: resultMap,
                         position: loc,
                         title: window._resultLocation
@@ -171,7 +163,6 @@
             });
         }
 
-        // If Maps already loaded, run now; otherwise the callback will trigger it
         if (typeof google !== 'undefined' && google.maps) {
             loadResultMap();
         } else {
@@ -244,7 +235,8 @@
         });
     });
 </script>
-<script async
-    src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&libraries=maps,marker,geocoding&loading=async&callback=initResultMap">
+<script
+    src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&callback=initResultMap"
+    async defer>
 </script>
 {% endblock %}
