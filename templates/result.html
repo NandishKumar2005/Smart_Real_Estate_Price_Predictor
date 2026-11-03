@@ -138,7 +138,10 @@
         recEl.className = adviScore >= 8 ? "fs-5 mt-1 d-block text-success" : adviScore >= 5 ? "fs-5 mt-1 d-block text-warning" : "fs-5 mt-1 d-block text-danger";
 
         // --- Google Maps ---
-        async function initMap() {
+        // Store location globally so initResultMap callback can access it
+        window._resultLocation = data.input.location;
+
+        async function loadResultMap() {
             const { Map } = await google.maps.importLibrary("maps");
             const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
             const { Geocoder } = await google.maps.importLibrary("geocoding");
@@ -152,25 +155,27 @@
             });
 
             const geocoder = new Geocoder();
-            geocoder.geocode({ address: data.input.location + ', India' }, (results, geoStatus) => {
+            // location already contains city e.g. "Whitefield, Bangalore"
+            const searchAddress = window._resultLocation + ', India';
+            geocoder.geocode({ address: searchAddress }, (results, geoStatus) => {
                 if (geoStatus === 'OK' && results[0]) {
                     const loc = results[0].geometry.location;
                     resultMap.setCenter(loc);
-                    resultMap.setZoom(13);
+                    resultMap.setZoom(14);
                     new AdvancedMarkerElement({
                         map: resultMap,
                         position: loc,
-                        title: data.input.location
+                        title: window._resultLocation
                     });
                 }
             });
         }
 
-        // Wait for Google Maps to be ready
+        // If Maps already loaded, run now; otherwise the callback will trigger it
         if (typeof google !== 'undefined' && google.maps) {
-            initMap();
+            loadResultMap();
         } else {
-            window.initResultMap = initMap;
+            window.initResultMap = loadResultMap;
         }
 
         // --- Charts ---

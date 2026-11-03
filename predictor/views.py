@@ -141,21 +141,31 @@ class PriceHeatmapAPIView(APIView):
                 'Bangalore': {'lat': 12.9716, 'lon': 77.5946},
                 'Mumbai':    {'lat': 19.0760, 'lon': 72.8777},
                 'Chennai':   {'lat': 13.0827, 'lon': 80.2707},
-                'Kolkata':   {'lat': 22.5726, 'lon': 88.3639}
+                'Kolkata':   {'lat': 22.5726, 'lon': 88.3639},
+                'Delhi':     {'lat': 28.6139, 'lon': 77.2090},
+                'Hyderabad': {'lat': 17.3850, 'lon': 78.4867},
             }
 
             grouped = df.groupby(['City', 'Location'])['Price'].mean().reset_index()
-            if len(grouped) > 250:
-                grouped = grouped.sample(n=250, random_state=42)
+
+            # Sample up to 60 locations per city so all 6 cities are represented
+            sampled = (
+                grouped.groupby('City', group_keys=False)
+                .apply(lambda g: g.sample(n=min(len(g), 60), random_state=42))
+                .reset_index(drop=True)
+            )
 
             data = []
-            for _, row in grouped.iterrows():
+            for _, row in sampled.iterrows():
                 city = row['City'].strip()
                 if city in city_coords:
-                    jitter_lat = (hash(row['Location']) % 100) / 1000.0 - 0.05
-                    jitter_lon = (hash(row['Location']) % 100) / 1000.0 - 0.05
+                    loc_hash = hash(row['Location'])
+                    # Use different hash seeds for lat/lon so bubbles spread out
+                    jitter_lat = (loc_hash % 1000) / 10000.0 - 0.05
+                    jitter_lon = ((loc_hash // 1000) % 1000) / 10000.0 - 0.05
                     data.append({
                         "location": f"{row['Location']}, {city}",
+                        "city": city,
                         "lat": city_coords[city]['lat'] + jitter_lat,
                         "lng": city_coords[city]['lon'] + jitter_lon,
                         "price": row['Price']
