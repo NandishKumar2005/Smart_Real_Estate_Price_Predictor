@@ -128,45 +128,66 @@ document.addEventListener('DOMContentLoaded', function() {
     recEl.textContent = adviRec;
     recEl.className = adviScore >= 8 ? 'fs-5 mt-1 d-block text-success' : adviScore >= 5 ? 'fs-5 mt-1 d-block text-warning' : 'fs-5 mt-1 d-block text-danger';
 
-    // ---- Google Maps: load dynamically so we control the timing ----
-    function initMap() {
-        var mapEl = document.getElementById('map');
-        var resultMap = new google.maps.Map(mapEl, {
-            center: { lat: 20.5937, lng: 78.9629 },
-            zoom: 5,
+    // ---- Google Maps ----
+    // City fallback coords in case geocoding fails
+    var cityFallback = {
+        'bangalore': {lat: 12.9716, lng: 77.5946},
+        'mumbai':    {lat: 19.0760, lng: 72.8777},
+        'chennai':   {lat: 13.0827, lng: 80.2707},
+        'kolkata':   {lat: 22.5726, lng: 88.3639},
+        'delhi':     {lat: 28.6139, lng: 77.2090},
+        'hyderabad': {lat: 17.3850, lng: 78.4867}
+    };
+
+    function getCity(loc) {
+        var l = loc.toLowerCase();
+        for (var city in cityFallback) {
+            if (l.indexOf(city) !== -1) return city;
+        }
+        return null;
+    }
+
+    function placePin(lat, lng) {
+        var resultMap = new google.maps.Map(document.getElementById('map'), {
+            center: {lat: lat, lng: lng},
+            zoom: 13,
             mapTypeControl: false,
             streetViewControl: false
         });
-
-        var geocoder = new google.maps.Geocoder();
-        geocoder.geocode({ address: data.input.location + ', India' }, function(results, status) {
-            if (status === 'OK' && results[0]) {
-                var pos = results[0].geometry.location;
-                resultMap.setCenter(pos);
-                resultMap.setZoom(14);
-
-                var marker = new google.maps.Marker({
-                    map: resultMap,
-                    position: pos,
-                    title: data.input.location
-                });
-
-                var infoWindow = new google.maps.InfoWindow({
-                    content: '<div style="color:#0f172a;padding:6px;min-width:150px">' +
-                             '<strong style="font-size:13px">' + data.input.location + '</strong><br>' +
-                             '<span style="font-size:12px;color:#334155">Predicted: <strong>' + fmt.format(data.price) + '</strong></span>' +
-                             '</div>'
-                });
-                infoWindow.open(resultMap, marker);
-            }
+        var marker = new google.maps.Marker({
+            map: resultMap,
+            position: {lat: lat, lng: lng},
+            title: data.input.location
         });
+        var iw = new google.maps.InfoWindow({
+            content: '<div style="color:#0f172a;padding:6px 4px;min-width:160px">' +
+                     '<strong style="font-size:13px;display:block;margin-bottom:2px">' + data.input.location + '</strong>' +
+                     '<span style="font-size:12px;color:#1e3a5f">Predicted: <strong>' + fmt.format(data.price) + '</strong></span>' +
+                     '</div>'
+        });
+        iw.open(resultMap, marker);
     }
 
-    // Dynamically inject Maps script — no callback race condition
-    var mapsScript = document.createElement('script');
-    mapsScript.src = 'https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}';
-    mapsScript.onload = function() { initMap(); };
-    document.head.appendChild(mapsScript);
+    window._gmapsReady = function() {
+        var geocoder = new google.maps.Geocoder();
+        geocoder.geocode({address: data.input.location + ', India'}, function(results, status) {
+            if (status === 'OK' && results[0]) {
+                var loc = results[0].geometry.location;
+                placePin(loc.lat(), loc.lng());
+            } else {
+                // Geocoding failed — use city centre as fallback
+                var city = getCity(data.input.location);
+                if (city) {
+                    placePin(cityFallback[city].lat, cityFallback[city].lng);
+                }
+            }
+        });
+    };
+
+    var s = document.createElement('script');
+    s.src = 'https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&libraries=geocoding&callback=_gmapsReady';
+    s.async = true;
+    document.head.appendChild(s);
 
     // ---- Charts ----
     Chart.defaults.color = '#94a3b8';
@@ -193,8 +214,8 @@ document.addEventListener('DOMContentLoaded', function() {
         options: {
             responsive: true,
             scales: {
-                x: { title: { display: true, text: 'Area (sq ft)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                y: { title: { display: true, text: 'Price (INR)' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                x: {title: {display: true, text: 'Area (sq ft)'}, grid: {color: 'rgba(255,255,255,0.05)'}},
+                y: {title: {display: true, text: 'Price (INR)'}, grid: {color: 'rgba(255,255,255,0.05)'}}
             }
         }
     });
@@ -215,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 borderWidth: 0, borderRadius: 4
             }]
         },
-        options: { responsive: true, scales: { y: { display: false } } }
+        options: {responsive: true, scales: {y: {display: false}}}
     });
 
     new Chart(document.getElementById('investmentChart').getContext('2d'), {
@@ -230,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 borderWidth: 2, borderRadius: 8
             }]
         },
-        options: { responsive: true, scales: { y: { display: false } } }
+        options: {responsive: true, scales: {y: {display: false}}}
     });
 });
 </script>
