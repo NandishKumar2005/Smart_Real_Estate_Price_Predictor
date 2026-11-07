@@ -101,6 +101,7 @@
 
     window.initResultMap = function() {
         var location = window._resultLocation;
+        var price = window._resultPrice;
         if (!location) { return; }
 
         resultMap = new google.maps.Map(document.getElementById('map'), {
@@ -116,11 +117,21 @@
                 var loc = results[0].geometry.location;
                 resultMap.setCenter(loc);
                 resultMap.setZoom(14);
-                new google.maps.Marker({
+
+                var marker = new google.maps.Marker({
                     map: resultMap,
                     position: loc,
                     title: location
                 });
+
+                var fmt = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+                var infoWindow = new google.maps.InfoWindow({
+                    content: '<div style="color:#0f172a;padding:4px 2px;min-width:140px">' +
+                             '<strong style="font-size:13px">' + location + '</strong><br>' +
+                             '<span style="font-size:12px;color:#334155">Predicted: <strong>' + fmt.format(price) + '</strong></span>' +
+                             '</div>'
+                });
+                infoWindow.open(resultMap, marker);
             }
         });
     };
@@ -163,8 +174,9 @@
         recEl.textContent = adviRec;
         recEl.className = adviScore >= 8 ? 'fs-5 mt-1 d-block text-success' : adviScore >= 5 ? 'fs-5 mt-1 d-block text-warning' : 'fs-5 mt-1 d-block text-danger';
 
-        // Store location for map callback
+        // Store location and price for map callback
         window._resultLocation = data.input.location;
+        window._resultPrice = data.price;
         // If Maps already loaded, init now
         if (typeof google !== 'undefined' && google.maps) {
             window.initResultMap();
