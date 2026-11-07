@@ -53,7 +53,7 @@
 <script>
     let map;
 
-    function initMap() {
+    window.initMap = function() {
         map = new google.maps.Map(document.getElementById('heatmap-container'), {
             center: { lat: 20.5, lng: 79.0 },
             zoom: 5,
@@ -62,27 +62,24 @@
             fullscreenControl: true,
         });
 
-        // Legend
-        const legend = document.createElement('div');
+        var legend = document.createElement('div');
         legend.className = 'legend';
-        legend.innerHTML = `
-            <strong style="display:block;margin-bottom:6px;">Pricing Legend</strong>
-            <div><span class="legend-dot" style="background:#22c55e"></span> Affordable (&lt;1Cr)</div>
-            <div><span class="legend-dot" style="background:#f97316"></span> Moderate (1Cr–3Cr)</div>
-            <div><span class="legend-dot" style="background:#ef4444"></span> Expensive (&gt;3Cr)</div>
-        `;
+        legend.innerHTML =
+            '<strong style="display:block;margin-bottom:6px;">Pricing Legend</strong>' +
+            '<div><span class="legend-dot" style="background:#22c55e"></span> Affordable (&lt;1Cr)</div>' +
+            '<div><span class="legend-dot" style="background:#f97316"></span> Moderate (1Cr&ndash;3Cr)</div>' +
+            '<div><span class="legend-dot" style="background:#ef4444"></span> Expensive (&gt;3Cr)</div>';
         map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(legend);
 
-        const fmt = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
-        const infoWindow = new google.maps.InfoWindow();
+        var fmt = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+        var infoWindow = new google.maps.InfoWindow();
 
         fetch('/api/price-heatmap')
-            .then(r => r.json())
-            .then(locations => {
-                const bounds = new google.maps.LatLngBounds();
-
-                locations.forEach(loc => {
-                    let color, radius;
+            .then(function(r) { return r.json(); })
+            .then(function(locations) {
+                var bounds = new google.maps.LatLngBounds();
+                locations.forEach(function(loc) {
+                    var color, radius;
                     if (loc.price < 10000000) {
                         color = '#22c55e';
                         radius = Math.max(1500, Math.min(6000, loc.price / 3000));
@@ -94,7 +91,7 @@
                         radius = Math.max(1500, Math.min(6000, loc.price / 12000));
                     }
 
-                    const circle = new google.maps.Circle({
+                    var circle = new google.maps.Circle({
                         map: map,
                         center: { lat: loc.lat, lng: loc.lng },
                         radius: radius,
@@ -102,22 +99,21 @@
                         strokeOpacity: 0.9,
                         strokeWeight: 1,
                         fillColor: color,
-                        fillOpacity: 0.5,
+                        fillOpacity: 0.5
                     });
 
-                    const content = `
-                        <div style="color:#0f172a;padding:6px;min-width:160px">
-                            <strong style="font-size:13px">${loc.location}</strong><br>
-                            <span style="font-size:12px">Avg Price: <strong>${fmt.format(loc.price)}</strong></span>
-                        </div>`;
+                    var content =
+                        '<div style="color:#0f172a;padding:6px;min-width:160px">' +
+                        '<strong style="font-size:13px">' + loc.location + '</strong><br>' +
+                        '<span style="font-size:12px">Avg Price: <strong>' + fmt.format(loc.price) + '</strong></span>' +
+                        '</div>';
 
-                    circle.addListener('mouseover', function() {
+                    google.maps.event.addListener(circle, 'mouseover', function() {
                         infoWindow.setContent(content);
                         infoWindow.setPosition(circle.getCenter());
                         infoWindow.open(map);
                     });
-
-                    circle.addListener('click', function() {
+                    google.maps.event.addListener(circle, 'click', function() {
                         infoWindow.setContent(content);
                         infoWindow.setPosition(circle.getCenter());
                         infoWindow.open(map);
@@ -125,14 +121,10 @@
 
                     bounds.extend({ lat: loc.lat, lng: loc.lng });
                 });
-
-                if (locations.length > 0) map.fitBounds(bounds);
+                if (locations.length > 0) { map.fitBounds(bounds); }
             })
-            .catch(err => console.error('Heatmap data error:', err));
-    }
+            .catch(function(err) { console.error('Heatmap data error:', err); });
+    };
 </script>
-<script
-    src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&callback=initMap"
-    async defer>
-</script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&callback=initMap" async></script>
 {% endblock %}
